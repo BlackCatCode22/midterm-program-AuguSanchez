@@ -1,0 +1,117 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+// Animal structure to store information
+struct Animal {
+    string uniqueID;
+    string name;
+    int age;
+    string sex;
+    string species;
+    string color;
+    int weight;
+    string origin;
+};
+
+// Function to calculate birthday based on season
+string calculateBirthday(string season) {
+    string birthday;
+    if (season == "spring") {
+        birthday = "March 21";
+    } else if (season == "summer") {
+        birthday = "June 21";
+    } else if (season == "autumn" || season == "fall") {
+        birthday = "September 21";
+    } else if (season == "winter") {
+        birthday = "December 21";
+    } else {
+        birthday = "Unknown";
+    }
+    return birthday;
+}
+
+// Function to generate a unique ID for each animal
+string generateUniqueID(int counter) {
+    stringstream ss;
+    ss << "A" << counter;
+    return ss.str();
+}
+
+// Function to randomly assign a name to each animal
+string assignAnimalName(const vector<string>& names, int counter) {
+    int index = counter % names.size();
+    return names[index];
+}
+
+// Function to extract animal information from the input line
+Animal parseAnimalInfo(const string& line) {
+    Animal animal;
+    stringstream ss(line);
+    string temp;
+    getline(ss, temp, ' ');
+    animal.age = stoi(temp);
+    getline(ss, animal.sex, ' ');
+    getline(ss, animal.species, ' ');
+    getline(ss, temp, ',');
+    getline(ss, animal.color, ',');
+    getline(ss, temp, ' ');
+    animal.weight = stoi(temp);
+    getline(ss, temp, ',');
+    getline(ss, animal.origin, ',');
+    return animal;
+}
+
+int main() {
+    ifstream inputFile("C:\Users\augus\Desktop\School\CIT-66\arrivingAnimals.txt");
+    ofstream outputFile("C:\Users\augus\Desktop\School\CIT-66\zooPopulation.txt");
+    ifstream animalNamesFile("C:\Users\augus\Desktop\School\CIT-66\animalNames.txt");
+    vector<string> animalNames;
+
+    // Read animal names from file
+    if (animalNamesFile.is_open()) {
+        string name;
+        while (getline(animalNamesFile, name)) {
+            animalNames.push_back(name);
+        }
+        animalNamesFile.close();
+    }
+
+    // Process arriving animals
+    string line;
+    int counter = 1;
+    vector<Animal> animals;
+
+    if (inputFile.is_open()) {
+        while (getline(inputFile, line)) {
+            Animal animal = parseAnimalInfo(line);
+            animal.uniqueID = generateUniqueID(counter);
+            animal.name = assignAnimalName(animalNames, counter);
+            animal.origin = animal.origin.substr(1); // Remove leading space
+            animal.age++;
+            string birthday = calculateBirthday(animal.origin);
+            animals.push_back(animal);
+
+            // Output animal information to file
+            outputFile << "Animal ID: " << animal.uniqueID << endl;
+            outputFile << "Name: " << animal.name << endl;
+            outputFile << "Age: " << animal.age << " year(s)" << endl;
+            outputFile << "Sex: " << animal.sex << endl;
+            outputFile << "Species: " << animal.species << endl;
+            outputFile << "Color: " << animal.color << endl;
+            outputFile << "Weight: " << animal.weight << " pounds" << endl;
+            outputFile << "Origin: " << animal.origin << endl;
+            outputFile << "Birthday: " << birthday << endl;
+            outputFile << endl;
+
+            counter++;
+        }
+        inputFile.close();
+    }
+
+    outputFile.close();
+    cout
